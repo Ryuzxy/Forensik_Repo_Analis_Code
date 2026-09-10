@@ -1,0 +1,144 @@
+{
+  "generated_at": "2026-09-10T09:34:17.0739957+07:00",
+  "summary": {
+    "total_files_scanned": 4,
+    "total_threats_found": 2,
+    "bin_files_count": 2,
+    "iso_files_count": 0,
+    "mem_files_count": 2
+  },
+  "bin_reports": [
+    {
+      "metadata": {
+        "file_path": "Bin\\analyzer.go",
+        "file_name": "analyzer.go",
+        "file_size": 13151,
+        "mod_time": "2026-09-10T09:33:04.1640253+07:00",
+        "file_type": "Raw Binary / Data",
+        "mime_type": "application/octet-stream",
+        "hashes": {
+          "md5": "e80c6707993535e93853676e3bc940dc",
+          "sha1": "e92ccd1b80fad67b38963f367d4b75888e4835fd",
+          "sha256": "648379bba0a08c9d8da4654587f27decb9f5d5956337956bbdfa564da5360a1d"
+        },
+        "entropy": 5.253,
+        "is_packed": false
+      },
+      "architecture": "Non-PE / Raw Binary",
+      "extracted_iocs": {
+        "ipv4_addresses": null,
+        "ipv6_addresses": null,
+        "urls": null,
+        "domains": null,
+        "emails": null
+      },
+      "risk_score": 45,
+      "risk_level": "HIGH",
+      "threats_detected": [
+        "Mimikatz Credential Dumper String Detected (Found string: '{strings.Join([]string{\"mimi\", \"katz\"}, \"\"), \"Mimikatz Credential Dumper String Detected\", 45},')"
+      ]
+    },
+    {
+      "metadata": {
+        "file_path": "Bin\\analyzer_test.go",
+        "file_name": "analyzer_test.go",
+        "file_size": 1405,
+        "mod_time": "2026-09-10T09:33:09.0902254+07:00",
+        "file_type": "Raw Binary / Data",
+        "mime_type": "application/octet-stream",
+        "hashes": {
+          "md5": "08dbe060ff113ef6440766f2947c9baa",
+          "sha1": "e36d6ddf4a1eaa9ff17a543b138bb8e9ef15d206",
+          "sha256": "493c3d45fd518a85ee4529b6783c40f8aefcda9dad175a548bfb14e8e26cc964"
+        },
+        "entropy": 5.17,
+        "is_packed": false
+      },
+      "architecture": "Non-PE / Raw Binary",
+      "extracted_iocs": {
+        "ipv4_addresses": null,
+        "ipv6_addresses": null,
+        "urls": null,
+        "domains": null,
+        "emails": null
+      },
+      "risk_score": 0,
+      "risk_level": "LOW",
+      "threats_detected": []
+    }
+  ],
+  "iso_reports": [],
+  "mem_reports": [
+    {
+      "metadata": {
+        "file_path": "MemDump\\analyzer.go",
+        "file_name": "analyzer.go",
+        "file_size": 7040,
+        "mod_time": "2026-09-10T09:33:36.0172489+07:00",
+        "file_type": "Raw Binary / Data",
+        "mime_type": "application/octet-stream",
+        "hashes": {
+          "md5": "98c32a30a953d3458859ba203ab59448",
+          "sha1": "1386c2964bc7afd7996399d707fb1e9c5126dda7",
+          "sha256": "0ecdc381d73868d8f65569f9704d01cd4d9b526bdd8f54ce0367a4d2ec1bcdae"
+        },
+        "entropy": 5.279,
+        "is_packed": false
+      },
+      "scan_duration_sec": 0.0015804,
+      "total_strings_extracted": 157,
+      "iocs": {
+        "ipv4_addresses": null,
+        "ipv6_addresses": null,
+        "urls": null,
+        "domains": null,
+        "emails": null
+      },
+      "artifacts": [
+        {
+          "type": "Suspicious_Execution",
+          "offset": 0,
+          "description": "Mimikatz In-Memory Credential Dump",
+          "snippet": "{strings.Join([]string{\"mimi\", \"katz\"}, \"\"), \"Mimikatz In-Memory Credential Dump\", 45},"
+        }
+      ],
+      "risk_score": 45,
+      "risk_level": "HIGH",
+      "threats_detected": [
+        "Memory Artifact: Mimikatz In-Memory Credential Dump (Matched: '{strings.Join([]string{\"mimi\", \"katz\"}, \"\"), \"Mimikatz In-Memory Credential Dump\", 45},')"
+      ]
+    },
+    {
+      "metadata": {
+        "file_path": "MemDump\\analyzer_test.go",
+        "file_name": "analyzer_test.go",
+        "file_size": 1629,
+        "mod_time": "2026-09-10T09:33:41.9473159+07:00",
+        "file_type": "Raw Binary / Data",
+        "mime_type": "application/octet-stream",
+        "hashes": {
+          "md5": "ab91988ffeb865f392a14792e81a07bf",
+          "sha1": "e202b8dc4d6ea40430432b659f8658c1af5f968c",
+          "sha256": "6236e66a9e62950bac218d3b411e8bea01d831410e53cfcfa6ecd58eb4b76961"
+        },
+        "entropy": 5.368,
+        "is_packed": false
+      },
+      "scan_duration_sec": 0.0016306,
+      "total_strings_extracted": 39,
+      "iocs": {
+        "ipv4_addresses": [
+          "198.51.100.23"
+        ],
+        "ipv6_addresses": null,
+        "urls": null,
+        "domains": null,
+        "emails": null
+      },
+      "artifacts": [],
+      "risk_score": 3,
+      "risk_level": "LOW",
+      "threats_detected": []
+    }
+  ]
+}

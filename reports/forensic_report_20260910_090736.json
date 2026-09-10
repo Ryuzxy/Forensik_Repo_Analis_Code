@@ -1,0 +1,195 @@
+{
+  "generated_at": "2026-09-10T09:07:36.394687+07:00",
+  "summary": {
+    "total_files_scanned": 1,
+    "total_threats_found": 11,
+    "bin_files_count": 1,
+    "iso_files_count": 0,
+    "mem_files_count": 0
+  },
+  "bin_reports": [
+    {
+      "metadata": {
+        "file_path": "forensic_analyzer.exe",
+        "file_name": "forensic_analyzer.exe",
+        "file_size": 4354048,
+        "mod_time": "2026-09-10T09:07:25.614484+07:00",
+        "file_type": "Windows Executable/DLL (PE)",
+        "mime_type": "application/x-dosexec",
+        "hashes": {
+          "md5": "ac1cf9ae486c3bb93bec2affa6896a0c",
+          "sha1": "8e3811e46db40bb9228355cb1dcfc81680756e6e",
+          "sha256": "df6eb400d01e18bbfe509dfc11b073054e1522f98dc65cb43dcb6ae675aec4ad"
+        },
+        "entropy": 6.873,
+        "is_packed": true
+      },
+      "architecture": "x64 (64-bit)",
+      "compile_time": "1970-01-01T00:00:00Z",
+      "subsystem": "Windows CUI (Console)",
+      "entrypoint": "0x81720",
+      "sections": [
+        {
+          "name": ".text",
+          "virtual_address": 4096,
+          "virtual_size": 1320241,
+          "raw_data_size": 1320448,
+          "entropy": 6.28
+        },
+        {
+          "name": ".rdata",
+          "virtual_address": 1327104,
+          "virtual_size": 1510408,
+          "raw_data_size": 1510912,
+          "entropy": 5.58
+        },
+        {
+          "name": ".data",
+          "virtual_address": 2838528,
+          "virtual_size": 34007552,
+          "raw_data_size": 147968,
+          "entropy": 4.61
+        },
+        {
+          "name": ".pdata",
+          "virtual_address": 36847616,
+          "virtual_size": 31356,
+          "raw_data_size": 31744,
+          "entropy": 5.455
+        },
+        {
+          "name": ".xdata",
+          "virtual_address": 36880384,
+          "virtual_size": 180,
+          "raw_data_size": 512,
+          "entropy": 1.782
+        },
+        {
+          "name": ".zdebug_abbrev",
+          "virtual_address": 36884480,
+          "virtual_size": 340,
+          "raw_data_size": 512,
+          "entropy": 5.673
+        },
+        {
+          "name": ".zdebug_line",
+          "virtual_address": 36888576,
+          "virtual_size": 263400,
+          "raw_data_size": 263680,
+          "entropy": 7.996,
+          "suspicious_flags": [
+            "High Entropy (8.00): Terenkripsi / Terkompresi / Packed"
+          ]
+        },
+        {
+          "name": ".zdebug_frame",
+          "virtual_address": 37154816,
+          "virtual_size": 51150,
+          "raw_data_size": 51200,
+          "entropy": 7.937,
+          "suspicious_flags": [
+            "High Entropy (7.94): Terenkripsi / Terkompresi / Packed"
+          ]
+        },
+        {
+          "name": ".debug_gdb_scripts",
+          "virtual_address": 37208064,
+          "virtual_size": 48,
+          "raw_data_size": 512,
+          "entropy": 0.856
+        },
+        {
+          "name": ".zdebug_info",
+          "virtual_address": 37212160,
+          "virtual_size": 445336,
+          "raw_data_size": 445440,
+          "entropy": 7.998,
+          "suspicious_flags": [
+            "High Entropy (8.00): Terenkripsi / Terkompresi / Packed"
+          ]
+        },
+        {
+          "name": ".zdebug_loclists",
+          "virtual_address": 37658624,
+          "virtual_size": 214853,
+          "raw_data_size": 215040,
+          "entropy": 7.996,
+          "suspicious_flags": [
+            "High Entropy (8.00): Terenkripsi / Terkompresi / Packed"
+          ]
+        },
+        {
+          "name": ".zdebug_rnglists",
+          "virtual_address": 37875712,
+          "virtual_size": 108026,
+          "raw_data_size": 108032,
+          "entropy": 7.993,
+          "suspicious_flags": [
+            "High Entropy (7.99): Terenkripsi / Terkompresi / Packed"
+          ]
+        },
+        {
+          "name": ".zdebug_addr",
+          "virtual_address": 37986304,
+          "virtual_size": 6485,
+          "raw_data_size": 6656,
+          "entropy": 7.738,
+          "suspicious_flags": [
+            "High Entropy (7.74): Terenkripsi / Terkompresi / Packed"
+          ]
+        },
+        {
+          "name": ".idata",
+          "virtual_address": 37994496,
+          "virtual_size": 1404,
+          "raw_data_size": 1536,
+          "entropy": 4.276
+        },
+        {
+          "name": ".reloc",
+          "virtual_address": 37998592,
+          "virtual_size": 29572,
+          "raw_data_size": 29696,
+          "entropy": 5.438
+        },
+        {
+          "name": ".symtab",
+          "virtual_address": 38031360,
+          "virtual_size": 218537,
+          "raw_data_size": 218624,
+          "entropy": 5.251
+        }
+      ],
+      "extracted_iocs": {
+        "ipv4_addresses": null,
+        "ipv6_addresses": null,
+        "urls": null,
+        "domains": [
+          "golang.org",
+          "eq.io",
+          "eq.net",
+          "hash.net",
+          "itab.net"
+        ],
+        "emails": null
+      },
+      "risk_score": 290,
+      "risk_level": "CRITICAL",
+      "threats_detected": [
+        "Timestomping Anomaly: Compile time terlalu lampau (\u003c 1998)",
+        "Section '.zdebug_line' memiliki entropi sangat tinggi (8.00), indikasi packing",
+        "Section '.zdebug_frame' memiliki entropi sangat tinggi (7.94), indikasi packing",
+        "Section '.zdebug_info' memiliki entropi sangat tinggi (8.00), indikasi packing",
+        "Section '.zdebug_loclists' memiliki entropi sangat tinggi (8.00), indikasi packing",
+        "Section '.zdebug_rnglists' memiliki entropi sangat tinggi (7.99), indikasi packing",
+        "Section '.zdebug_addr' memiliki entropi sangat tinggi (7.74), indikasi packing",
+        "Mimikatz Credential Dumper String Detected (Found string: 'pc=  G\\\\.\\\\?\\??125625NaNHanLaoMroNkoVaicgodnstcpudp): '\"'adxaesshaavxfma: `   gcmfiletypeautotrueuintreadseekopensyncpipeStatJuneJulyEESTSASTAKSTAKDTACSTACDTAESTAEDTAWSTCESTNZSTNZDTUPX0UPX1UPX2.upxvmp0vmp1.nspHIGH0x%Xwmic\\Runmimikatz.exe.lnk.bat.cmd.vbs.hta.scr.dll.ps1.isoboolint8chanfunccallkind on allgallprootitabsbrkidledead is LEAFheapbase at Has  of ) =  \u003c==GOGC] =  pc=: p=cas1cas2cas3cas4cas5cas6')",
+        "Scheduled Task Persistence Creation (Found string: 'types : type \\\\.\\UNCCopySidWSARecvWSASendconnect19531259765625ControlAvestanBengaliBrailleCypriotDeseretElbasanElymaicGranthaHanunooKannadaMakasarMandaicMarchenMultaniMyanmarOsmanyaSharadaShavianSiddhamSinhalaSogdianSoyomboTagalogTibetanTirhutaavx512fruntimeos/execfips140tls3destlssha1net/urlInstAltInstNopalt -\u003e nop -\u003e any -\u003e AES-CBCFile_ISOdurationGoStringfile+netFullPathThursdaySaturdayFebruaryNovemberDecember%!Month(.themidaCRITICALvssadmin shadows catalogschtasks /createcertutilShortcutsekurlsaprocdumpscavengepollDescsynctesttraceBufdeadlockraceFinipanicnilcgocheckrunnable is not  pointerBAD RANK status unknown(trigger= npages= nalloc= nfreed=[signal  newval= mcount= bytes, rax     rbx     rcx     rdx     rdi     rsi     rbp     rsp     r8      r9      r10     r11     r12     r13     r14     r15     rip     rflags  cs      fs      gs       stack=[ minLC=  maxpc=  packed= -\u003e ptr=')",
+        "Mimikatz Credential Dumper String Detected (Found string: 'flag provided but not defined: -%sMimikatz In-Memory Credential Dump**Total File Dianalisis:** `%d`  ')",
+        "Mimikatz Credential Dumper String Detected (Found string: 'runtime.AddCleanup: ptr is arena-allocatedTime.MarshalBinary: unexpected zone offsetEarly bird injection / APC queue injectionDeteksi packer signature pada section '%s'Mimikatz Credential Dumper String Detected| Kategori | Jumlah Berkas | Keterangan |')"
+      ]
+    }
+  ],
+  "iso_reports": [],
+  "mem_reports": []
+}

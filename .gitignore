@@ -1,0 +1,22 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+forensic_analyzer.exe
+
+# Go build / test cache
+.gocache/
+
+# Output reports if desired to keep private (or keep reports tracked, optional)
+# Uncomment if reports should not be tracked:
+# reports/
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
