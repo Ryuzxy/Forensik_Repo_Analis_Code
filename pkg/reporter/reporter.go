@@ -17,11 +17,13 @@ func PrintConsoleReport(report common.OverallForensicReport) {
 	fmt.Println("             FORENSIK REPO ANALYZER - SUMMARY REPORT")
 	fmt.Println(strings.Repeat("=", 80))
 	fmt.Printf("Waktu Analisis : %s\n", report.GeneratedAt.Format("2006-01-02 15:04:05 MST"))
-	fmt.Printf("Total Berkas   : %d (Bin: %d | ISO: %d | MemDump: %d)\n",
+	fmt.Printf("Total Berkas   : %d (Bin: %d | ISO: %d | MemDump: %d | Hex: %d | Heap: %d)\n",
 		report.Summary.TotalFilesScanned,
 		report.Summary.BinFilesCount,
 		report.Summary.ISOFilesCount,
 		report.Summary.MemFilesCount,
+		report.Summary.HexFilesCount,
+		report.Summary.HeapFilesCount,
 	)
 	fmt.Printf("Total Ancaman  : %d Terdeteksi\n", report.Summary.TotalThreatsFound)
 	fmt.Println(strings.Repeat("-", 80))
@@ -47,6 +49,22 @@ func PrintConsoleReport(report common.OverallForensicReport) {
 		fmt.Println("\n[*] HASIL ANALISIS MEMORY DUMP (Folder: MemDump/)")
 		for _, m := range report.MemReports {
 			printMemReportConsole(m)
+		}
+	}
+
+	// Print Hex Reports
+	if len(report.HexReports) > 0 {
+		fmt.Println("\n[*] HASIL ANALISIS KODE HEX & SHELLCODE (Folder: Hex/)")
+		for _, h := range report.HexReports {
+			printHexReportConsole(h)
+		}
+	}
+
+	// Print Heap Reports
+	if len(report.HeapReports) > 0 {
+		fmt.Println("\n[*] HASIL ANALISIS HEAP MEMORY (Folder: Heap/)")
+		for _, hp := range report.HeapReports {
+			printHeapReportConsole(hp)
 		}
 	}
 
@@ -137,6 +155,86 @@ func printMemReportConsole(m common.MemAnalysisReport) {
 	printIOCSummary(m.IOCs)
 }
 
+func printHexReportConsole(h common.HexAnalysisReport) {
+	badge := formatRiskBadge(h.RiskLevel)
+	fmt.Printf("\n  Sumber       : %s\n", h.InputSource)
+	fmt.Printf("  Ukuran Byte  : %d bytes | Entropi: %.2f\n", h.ByteLength, h.Entropy)
+	fmt.Printf("  SHA-256      : %s\n", h.Hashes.SHA256)
+	fmt.Printf("  Status Risk  : %s (Skor: %d)\n", badge, h.RiskScore)
+
+	if len(h.ShellcodeFindings) > 0 {
+		fmt.Printf("  Pola Shellcode Terdeteksi (%d):\n", len(h.ShellcodeFindings))
+		for _, sf := range h.ShellcodeFindings {
+			fmt.Printf("    - [%s] 0x%X: %s\n", sf.Type, sf.Offset, sf.Description)
+		}
+	}
+
+	if len(h.XORDeobfuscation) > 0 {
+		fmt.Printf("  Kandidat Deobfuscasi XOR (%d):\n", len(h.XORDeobfuscation))
+		for _, x := range h.XORDeobfuscation {
+			fmt.Printf("    - Key %s (Byte: 0x%02X) | Cocok: '%s' | Cuplikan: \"%s\"\n", x.KeyHex, x.KeyByte, x.MatchedWord, x.SampleText)
+		}
+	}
+
+	if h.HexDumpPreview != "" {
+		fmt.Println("  Preview Hexdump (Kanonikal):")
+		lines := strings.Split(strings.TrimRight(h.HexDumpPreview, "\n"), "\n")
+		for _, l := range takeFirst(lines, 6) {
+			fmt.Printf("    %s\n", l)
+		}
+	}
+
+	if len(h.ThreatsDetected) > 0 {
+		fmt.Println("  Temuan Ancaman:")
+		for _, t := range h.ThreatsDetected {
+			fmt.Printf("    [!] %s\n", t)
+		}
+	}
+
+	printIOCSummary(h.IOCs)
+}
+
+func printHeapReportConsole(hp common.HeapAnalysisReport) {
+	badge := formatRiskBadge(hp.RiskLevel)
+	fmt.Printf("\n  File         : %s\n", hp.Metadata.FileName)
+	fmt.Printf("  Ukuran       : %d bytes | Entropi: %.2f\n", hp.Metadata.FileSize, hp.Metadata.Entropy)
+	fmt.Printf("  Status Risk  : %s (Skor: %d)\n", badge, hp.RiskScore)
+
+	if len(hp.HeapPatterns) > 0 {
+		fmt.Printf("  Pola Marker Heap Ditemukan (%d):\n", len(hp.HeapPatterns))
+		for _, p := range hp.HeapPatterns {
+			fmt.Printf("    - [%s] %s (%s): %d kali (Offset awal: 0x%X)\n", p.Severity, p.HexValue, p.PatternName, p.Count, p.FirstOffset)
+		}
+	}
+
+	if hp.HeapSprayDetected {
+		fmt.Printf("  [!] HEAP SPRAY ALERT: %s\n", hp.HeapSprayDetails)
+	}
+
+	if len(hp.CarvedHTTP) > 0 {
+		fmt.Printf("  Carved HTTP Headers (%d):\n", len(hp.CarvedHTTP))
+		for _, h := range takeFirst(hp.CarvedHTTP, 4) {
+			fmt.Printf("    - %s\n", h)
+		}
+	}
+
+	if len(hp.CarvedJSON) > 0 {
+		fmt.Printf("  Carved JSON Objects (%d):\n", len(hp.CarvedJSON))
+		for _, j := range takeFirst(hp.CarvedJSON, 3) {
+			fmt.Printf("    - %s\n", j)
+		}
+	}
+
+	if len(hp.ThreatsDetected) > 0 {
+		fmt.Println("  Temuan Ancaman:")
+		for _, t := range hp.ThreatsDetected {
+			fmt.Printf("    [!] %s\n", t)
+		}
+	}
+
+	printIOCSummary(hp.IOCs)
+}
+
 func printIOCSummary(ioc common.IOCReport) {
 	hasIOC := len(ioc.IPv4Addresses) > 0 || len(ioc.URLs) > 0 || len(ioc.Emails) > 0 || len(ioc.TokensOrKeys) > 0
 	if !hasIOC {
@@ -217,7 +315,9 @@ func generateMarkdownReport(report common.OverallForensicReport) string {
 	sb.WriteString("|---|---|---|\n")
 	sb.WriteString(fmt.Sprintf("| **Bin (Executable/PE/ELF)** | %d | Analisis arsitektur, section entropy, import API, dan packer signature |\n", report.Summary.BinFilesCount))
 	sb.WriteString(fmt.Sprintf("| **File_ISO (Disk Image)** | %d | Metadata ISO 9660, hirarki direktori, dan deteksi MOTW bypass malware |\n", report.Summary.ISOFilesCount))
-	sb.WriteString(fmt.Sprintf("| **MemDump (Memory Dump)** | %d | Streaming scanner, artefak command-line, embedded PE, dan IOC hunting |\n\n", report.Summary.MemFilesCount))
+	sb.WriteString(fmt.Sprintf("| **MemDump (Memory Dump)** | %d | Streaming scanner, artefak command-line, embedded PE, dan IOC hunting |\n", report.Summary.MemFilesCount))
+	sb.WriteString(fmt.Sprintf("| **Hex (Raw Hex & Shellcode)** | %d | Normalisasi hex, deteksi pola shellcode (NOP sled, GetPC), XOR brute-force |\n", report.Summary.HexFilesCount))
+	sb.WriteString(fmt.Sprintf("| **Heap (Heap Structure & Spray)** | %d | Windows Heap debug markers, heap spray heuristics, in-heap HTTP/JSON carving |\n\n", report.Summary.HeapFilesCount))
 
 	// Detail Bin
 	if len(report.BinReports) > 0 {
@@ -303,6 +403,67 @@ func generateMarkdownReport(report common.OverallForensicReport) string {
 				}
 				for _, tok := range m.IOCs.TokensOrKeys {
 					sb.WriteString(fmt.Sprintf("- Kredensial: `%s`\n", tok))
+				}
+				sb.WriteString("\n")
+			}
+		}
+	}
+
+	// Detail Hex
+	if len(report.HexReports) > 0 {
+		sb.WriteString("## 4. Analisis Kode Hex & Shellcode (`Hex/`)\n\n")
+		for _, h := range report.HexReports {
+			sb.WriteString(fmt.Sprintf("### Target: `%s`\n\n", h.InputSource))
+			sb.WriteString(fmt.Sprintf("- **Panjang Byte**: %d bytes\n", h.ByteLength))
+			sb.WriteString(fmt.Sprintf("- **Entropi**: `%.3f`\n", h.Entropy))
+			sb.WriteString(fmt.Sprintf("- **SHA-256**: `%s`\n", h.Hashes.SHA256))
+			sb.WriteString(fmt.Sprintf("- **Tingkat Risiko**: **%s** (Skor: %d)\n\n", h.RiskLevel, h.RiskScore))
+
+			if len(h.ShellcodeFindings) > 0 {
+				sb.WriteString("#### Pola Shellcode Terdeteksi:\n")
+				for _, sf := range h.ShellcodeFindings {
+					sb.WriteString(fmt.Sprintf("- ⚠️ **[%s]** (Offset `0x%X`): %s\n", sf.Type, sf.Offset, sf.Description))
+				}
+				sb.WriteString("\n")
+			}
+
+			if len(h.XORDeobfuscation) > 0 {
+				sb.WriteString("#### Hasil Deobfuscasi XOR:\n")
+				for _, x := range h.XORDeobfuscation {
+					sb.WriteString(fmt.Sprintf("- 🔓 **Key `%s`**: Menemukan `%s` (Cuplikan: `%s`)\n", x.KeyHex, x.MatchedWord, x.SampleText))
+				}
+				sb.WriteString("\n")
+			}
+		}
+	}
+
+	// Detail Heap
+	if len(report.HeapReports) > 0 {
+		sb.WriteString("## 5. Analisis Struktur Heap Memory (`Heap/`)\n\n")
+		for _, hp := range report.HeapReports {
+			sb.WriteString(fmt.Sprintf("### Berkas: `%s`\n\n", hp.Metadata.FileName))
+			sb.WriteString(fmt.Sprintf("- **Ukuran**: %d bytes\n", hp.Metadata.FileSize))
+			sb.WriteString(fmt.Sprintf("- **Entropi**: `%.3f`\n", hp.Metadata.Entropy))
+			sb.WriteString(fmt.Sprintf("- **Tingkat Risiko**: **%s** (Skor: %d)\n\n", hp.RiskLevel, hp.RiskScore))
+
+			if len(hp.HeapPatterns) > 0 {
+				sb.WriteString("#### Marker Heap & Pola Korupsi Terdeteksi:\n\n")
+				sb.WriteString("| Marker Hex | Nama Pola | Jumlah | Offset Awal | Keterangan |\n")
+				sb.WriteString("|---|---|---|---|---|\n")
+				for _, p := range hp.HeapPatterns {
+					sb.WriteString(fmt.Sprintf("| `%s` | %s | %d | `0x%X` | %s |\n", p.HexValue, p.PatternName, p.Count, p.FirstOffset, p.Description))
+				}
+				sb.WriteString("\n")
+			}
+
+			if hp.HeapSprayDetected {
+				sb.WriteString(fmt.Sprintf("#### ⚠️ Peringatan Heap Spraying:\n%s\n\n", hp.HeapSprayDetails))
+			}
+
+			if len(hp.CarvedHTTP) > 0 {
+				sb.WriteString("#### In-Heap Carved HTTP Headers:\n")
+				for _, hdr := range hp.CarvedHTTP {
+					sb.WriteString(fmt.Sprintf("- `%s`\n", hdr))
 				}
 				sb.WriteString("\n")
 			}

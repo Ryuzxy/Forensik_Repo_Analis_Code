@@ -10,7 +10,7 @@ if not exist "%~dp0forensic_analyzer.exe" (
 )
 
 if "%~1"=="" (
-    echo [*] Memindai seluruh artefak di folder Bin/, File_ISO/, dan MemDump/...
+    echo [*] Memindai seluruh artefak di folder Bin/, File_ISO/, MemDump/, Hex/, dan Heap/...
     "%~dp0forensic_analyzer.exe" -all -out reports
 ) else (
     echo [*] Menganalisis target: %1

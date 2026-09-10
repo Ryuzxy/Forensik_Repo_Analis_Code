@@ -1,0 +1,56 @@
+{
+  "generated_at": "2026-09-10T10:06:26.7680077+07:00",
+  "summary": {
+    "total_files_scanned": 1,
+    "total_threats_found": 2,
+    "bin_files_count": 0,
+    "iso_files_count": 0,
+    "mem_files_count": 0,
+    "hex_files_count": 1,
+    "heap_files_count": 0
+  },
+  "bin_reports": [],
+  "iso_reports": [],
+  "mem_reports": [],
+  "hex_reports": [
+    {
+      "input_source": "Raw Hex Input",
+      "byte_length": 14,
+      "entropy": 1.522,
+      "hashes": {
+        "md5": "d0dc0270163203715c679dc194486b30",
+        "sha1": "86a0b206df78491b9aaa2b91e6c514803f12c4e1",
+        "sha256": "8401af04859d2136483ed266f1680c812dfedfc14e47dfc7b1365cdc242c69cd"
+      },
+      "hexdump_preview": "00000000  90 90 90 90 90 90 90 90  E8 00 00 00 00 58        |.............X|\n",
+      "shellcode_findings": [
+        {
+          "offset": 0,
+          "type": "NOP_Sled",
+          "description": "Deteksi NOP sled (0x90) berurutan sepanjang 8 bytes (indikasi shellcode landing pad)",
+          "snippet": "0x90 repeated 8 times at offset 0x0"
+        },
+        {
+          "offset": 8,
+          "type": "GetPC_CallPop",
+          "description": "Deteksi teknik GetPC (call $+5; pop register) untuk kalkulasi runtime relative address pada position-independent shellcode",
+          "snippet": "Opcode: E8 00 00 00 00 58 at offset 0x8"
+        }
+      ],
+      "iocs": {
+        "ipv4_addresses": null,
+        "ipv6_addresses": null,
+        "urls": null,
+        "domains": null,
+        "emails": null
+      },
+      "risk_score": 50,
+      "risk_level": "HIGH",
+      "threats_detected": [
+        "Shellcode Signature: NOP_Sled (Deteksi NOP sled (0x90) berurutan sepanjang 8 bytes (indikasi shellcode landing pad))",
+        "Shellcode Signature: GetPC_CallPop (Deteksi teknik GetPC (call $+5; pop register) untuk kalkulasi runtime relative address pada position-independent shellcode)"
+      ]
+    }
+  ],
+  "heap_reports": []
+}

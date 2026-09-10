@@ -127,13 +127,70 @@ type MemAnalysisReport struct {
 	ThreatsDetected []string         `json:"threats_detected"`
 }
 
+// ShellcodeFinding mencatat pola instruksi shellcode berbahaya
+type ShellcodeFinding struct {
+	Offset      int64  `json:"offset"`
+	Type        string `json:"type"` // "NOP_Sled", "GetPC_CallPop", "PEB_Traversal", "Syscall_Sequence", "Egg_Hunter"
+	Description string `json:"description"`
+	Snippet     string `json:"snippet"`
+}
+
+// XORCandidate mencatat hasil deobfuscasi XOR
+type XORCandidate struct {
+	KeyHex      string `json:"key_hex"`
+	KeyByte     byte   `json:"key_byte"`
+	MatchedWord string `json:"matched_word"`
+	SampleText  string `json:"sample_text"`
+}
+
+// HexAnalysisReport menyimpan hasil analisis modul Hex
+type HexAnalysisReport struct {
+	InputSource          string             `json:"input_source"`
+	ByteLength           int                `json:"byte_length"`
+	Entropy              float64            `json:"entropy"`
+	Hashes               HashInfo           `json:"hashes"`
+	HexDumpPreview       string             `json:"hexdump_preview"`
+	ShellcodeFindings    []ShellcodeFinding `json:"shellcode_findings"`
+	XORDeobfuscation     []XORCandidate     `json:"xor_deobfuscation,omitempty"`
+	IOCs                 IOCReport          `json:"iocs"`
+	RiskScore            int                `json:"risk_score"`
+	RiskLevel            string             `json:"risk_level"`
+	ThreatsDetected      []string           `json:"threats_detected"`
+}
+
+// HeapPatternFinding mencatat marker heap Windows dan pola korupsi memori
+type HeapPatternFinding struct {
+	PatternName string `json:"pattern_name"` // e.g. "BAADF00D (Uninitialized Heap)"
+	HexValue    string `json:"hex_value"`
+	Count       int    `json:"count"`
+	FirstOffset int64  `json:"first_offset"`
+	Description string `json:"description"`
+	Severity    string `json:"severity"`
+}
+
+// HeapAnalysisReport menyimpan hasil investigasi struktur Heap
+type HeapAnalysisReport struct {
+	Metadata          FileMetadata         `json:"metadata"`
+	HeapPatterns      []HeapPatternFinding `json:"heap_patterns"`
+	HeapSprayDetected bool                 `json:"heap_spray_detected"`
+	HeapSprayDetails  string               `json:"heap_spray_details,omitempty"`
+	CarvedHTTP        []string             `json:"carved_http,omitempty"`
+	CarvedJSON        []string             `json:"carved_json,omitempty"`
+	IOCs              IOCReport            `json:"iocs"`
+	RiskScore         int                  `json:"risk_score"`
+	RiskLevel         string               `json:"risk_level"`
+	ThreatsDetected   []string             `json:"threats_detected"`
+}
+
 // OverallForensicReport menampung seluruh hasil analisis
 type OverallForensicReport struct {
-	GeneratedAt time.Time           `json:"generated_at"`
-	Summary     ScanSummary         `json:"summary"`
-	BinReports  []BinAnalysisReport `json:"bin_reports"`
-	ISOReports  []ISOAnalysisReport `json:"iso_reports"`
-	MemReports  []MemAnalysisReport `json:"mem_reports"`
+	GeneratedAt time.Time            `json:"generated_at"`
+	Summary     ScanSummary          `json:"summary"`
+	BinReports  []BinAnalysisReport  `json:"bin_reports"`
+	ISOReports  []ISOAnalysisReport  `json:"iso_reports"`
+	MemReports  []MemAnalysisReport  `json:"mem_reports"`
+	HexReports  []HexAnalysisReport  `json:"hex_reports"`
+	HeapReports []HeapAnalysisReport `json:"heap_reports"`
 }
 
 // ScanSummary ringkasan eksekutif
@@ -143,4 +200,6 @@ type ScanSummary struct {
 	BinFilesCount     int `json:"bin_files_count"`
 	ISOFilesCount     int `json:"iso_files_count"`
 	MemFilesCount     int `json:"mem_files_count"`
+	HexFilesCount     int `json:"hex_files_count"`
+	HeapFilesCount    int `json:"heap_files_count"`
 }

@@ -1,6 +1,6 @@
 # Forensik_Repo_Analis_Code
 
-Advanced Digital Forensics Analyzer Toolkit dibuat untuk menganalisis artefak digital (Binary/Executable, ISO Disk Image, dan Memory Dump) berbasis **Go** dengan performa tinggi dan konsumsi memori yang efisien (streaming I/O).
+Advanced Digital Forensics Analyzer Toolkit dibuat untuk menganalisis artefak digital (**Binary/Executable**, **ISO Disk Image**, **Memory Dump**, **Kode Hex & Shellcode**, serta **Heap Memory Structures**) berbasis **Go** dengan performa tinggi dan konsumsi memori yang efisien (*streaming I/O*).
 
 ---
 
@@ -17,6 +17,12 @@ Forensik_Repo_Analis_Code/
 ├── MemDump/              # Modul & tempat file memory dump (.raw, .dmp, .vmem, .dd)
 │   ├── analyzer.go       # Streaming memory scanner, dual string extraction, PE hunter
 │   └── analyzer_test.go  # Unit test modul memory dump
+├── Hex/                  # Modul & tempat file kode hex / shellcode (.hex, .raw, .txt)
+│   ├── analyzer.go       # Hex normalizer, canonical hexdump, shellcode hunter, XOR brute-force
+│   └── analyzer_test.go  # Unit test modul hex
+├── Heap/                 # Modul & tempat file heap memory dump (.dmp, .raw)
+│   ├── analyzer.go       # Heap corruption markers (0xBAADF00D), heap spray, in-heap HTTP/JSON carving
+│   └── analyzer_test.go  # Unit test modul heap
 ├── pkg/
 │   ├── common/           # Shared models, Shannon Entropy, multi-hash, IOC patterns
 │   └── reporter/         # Generator laporan Console, Markdown, dan JSON
@@ -74,42 +80,75 @@ Forensik_Repo_Analis_Code/
 - **Embedded PE Header Hunter**:
   - Melacak header executable PE (`MZ` & `PE\0\0`) di unallocated/raw memory (indikasi *Process Hollowing* atau *Reflective DLL Injection*).
 - **Memory Artifact & Command-Line Hunting**:
-  - Melacak sisa jejak eksekusi perintah berbahaya sebelum memori didump (`cmd.exe /c`, `powershell -enc`, `vssadmin delete shadows`, `whoami /all`, `mimikatz`, `procdump`, `net user /add`).
+  - Melacak sisa jejak eksekusi perintah berbahaya sebelum memori didump (`cmd.exe /c`, `powershell -enc`, `vssadmin delete shadows`, `whoami /all`, `mimikatz`, `net user /add`).
 - **Ekstraksi IOC & Kredensial**:
   - IPv4, IPv6, URL C2, email, domain, JWT token, AWS Access Keys, dan header private key.
 
 ---
 
+### 4. `Hex/` (Raw Hex & Shellcode Analyzer)
+- **Universal Hex Decoder**:
+  - Mampu membaca berbagai format hex: string kontinu (`4d5a90...`), C/Python array (`\x90\x90` atau `0x90, 0x90`), serta canonical hexdump (seperti output Wireshark, x64dbg, atau `xxd`).
+- **Pola Shellcode Heuristics**:
+  - Deteksi **NOP Sleds** (`0x90` berurutan).
+  - Deteksi teknik **GetPC** (`call $+5; pop reg` / `E8 00 00 00 00 58..5F`).
+  - Deteksi **PEB Traversal** (`mov eax, fs:[0x30]` pada x86 atau `mov rax, gs:[0x60]` pada x64).
+  - Deteksi **Direct Syscalls** (`0x0F 0x05` / `sysenter`) untuk mem-bypass EDR API hooks.
+- **XOR / Substitution Brute-Force Deobfuscator**:
+  - Secara otomatis mencoba key 0x01 s/d 0xFF untuk membongkar payload terenkripsi dan mencari kata kunci C2/malware (`http://`, `powershell`, `cmd.exe`, `VirtualAlloc`, dll).
+- **Canonical Hexdump Viewer**:
+  - Format grid 16-kolom dengan representasi teks ASCII printable.
+
+---
+
+### 5. `Heap/` (Heap Memory & Structure Analyzer)
+- **Windows Heap Corruption & Debug Markers**:
+  - `0xBAADF00D`: Alokasi heap Windows belum diinisialisasi (*uninitialized heap*).
+  - `0xFEEEFEEE`: Blok heap yang sudah di-free (*Use-After-Free / Double Free markers*).
+  - `0xABABABAB`: Heap allocation guard boundary page.
+  - `0xCCCCCCCC`: Uninitialized stack / debug CRT filler.
+  - `0xFDFDFDFD`: NoMansLand heap buffer boundary.
+  - `0xDEADBEEF`: Crash / poisoned memory pointer.
+- **Heap Spraying Detector**:
+  - Mendeteksi blok repetisi masif ber-entropi rendah (seperti `0x0C0C0C0C`, `0x0D0D0D0D`, atau `0x90909090` berulang) khas pada eksploitasi browser / heap buffer overflow.
+- **In-Heap Structured Data Carving**:
+  - Rekonstruksi **HTTP Headers** (`Authorization: Bearer <token>`, `Cookie: `, `POST /`).
+  - Rekonstruksi payload **JSON** dan **XML** yang tertinggal di heap proses.
+
+---
+
 ## 🛠️ Cara Penggunaan
 
-### Cara 1: Menggunakan Executable / Launcher (Paling Mudah)
-Cukup letakkan file artefak Anda ke dalam folder `Bin/`, `File_ISO/`, atau `MemDump/`, lalu:
+### Cara 1: Menggunakan Executable / Launcher (1-Klik)
+Cukup letakkan file artefak Anda ke dalam folder `Bin/`, `File_ISO/`, `MemDump/`, `Hex/`, atau `Heap/`, lalu:
 - **Klik dua kali** pada `run_analysis.bat` (atau jalankan `.\run_analysis.ps1` di PowerShell).
 
 ### Cara 2: Menjalankan via Command Line (CLI)
 
-1. **Scan Seluruh Folder Repositori (`Bin/`, `File_ISO/`, `MemDump/`)**:
+1. **Scan Seluruh Folder Repositori**:
    ```powershell
    .\forensic_analyzer.exe -all
-   # atau via Go:
-   go run main.go -all
    ```
 
-2. **Analisis Berkas Spesifik**:
+2. **Analisis Kode Hex / Shellcode Langsung**:
    ```powershell
-   .\forensic_analyzer.exe -file "C:\path\to\suspicious.exe"
-   .\forensic_analyzer.exe -file "C:\path\to\sample.iso"
+   # String hex mentah:
+   .\forensic_analyzer.exe -hex "9090909090909090e80000000058"
+
+   # File teks hex:
+   .\forensic_analyzer.exe -hex "C:\path\to\payload.hex"
+   ```
+
+3. **Analisis Heap Memory Dump**:
+   ```powershell
+   .\forensic_analyzer.exe -heap "C:\path\to\heap_dump.dmp"
+   ```
+
+4. **Analisis Berkas Spesifik Berdasarkan Ekstensi**:
+   ```powershell
+   .\forensic_analyzer.exe -file "C:\path\to\malware.exe"
+   .\forensic_analyzer.exe -file "C:\path\to\evidence.iso"
    .\forensic_analyzer.exe -file "C:\path\to\memory.raw"
-   ```
-
-3. **Analisis Direktori Khusus**:
-   ```powershell
-   .\forensic_analyzer.exe -dir "C:\cases\incident_01\evidence"
-   ```
-
-4. **Menentukan Output Folder Laporan**:
-   ```powershell
-   .\forensic_analyzer.exe -all -out "hasil_analisis"
    ```
 
 ---
@@ -117,9 +156,9 @@ Cukup letakkan file artefak Anda ke dalam folder `Bin/`, `File_ISO/`, atau `MemD
 ## 📊 Hasil Laporan (Reports)
 
 Setiap pemindaian menghasilkan:
-1. **Tampilan Terminal Berwarna**: Rangkuman temuan ancaman, skor risiko (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`), dan IOC.
-2. **File JSON (`reports/forensic_report_<timestamp>.json`)**: Data terstruktur lengkap siap diintegrasikan dengan SIEM / SOAR / pipeline otomatis.
-3. **File Markdown (`reports/forensic_report_<timestamp>.md`)**: Laporan investigasi bergaya GitHub Markdown dengan tabel terstruktur untuk dokumentasi insiden.
+1. **Tampilan Terminal Visual**: Rangkuman temuan ancaman, skor risiko (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`), marker heap, pola shellcode, dan IOC.
+2. **File JSON (`reports/forensic_report_<timestamp>.json`)**: Data terstruktur lengkap siap diintegrasikan dengan SIEM / SOAR.
+3. **File Markdown (`reports/forensic_report_<timestamp>.md`)**: Laporan investigasi berformat GitHub Markdown dengan tabel terstruktur untuk dokumentasi insiden.
 
 ---
 
